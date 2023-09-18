@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client UI</title>
+</head>
+
+<body>
+    <!-- Page title -->
+    <h1>Client UI</h1>
+
+    <!-- Buttons -->
+    <button onclick="listBlocks()">List Blocks</button>
+    <button onclick="addBlockPrompt()">Add Block</button>
+
+    <!-- Block count and output -->
+    <h2 id="blockCount">Total Blocks: </h2>
+    <pre id="output"></pre>
+
+    <script>
+        // Function to list blocks
+        async function listBlocks() {
+            try {
+                const response = await fetch('/blockchain');
+                const data = await response.json();
+                document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('output').textContent = 'Error fetching blocks';
+            }
+        }
+
+        // Function to add a block
+        async function addBlockPrompt() {
+            const data = prompt('Enter data of new block:');
+            if (data) {
+                try {
+                    const response = await fetch('/blockchain', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ data })
+                    });
+                    const newBlock = await response.json();
+                    document.getElementById('output').textContent = JSON.stringify(newBlock, null, 2);
+                    updateBlockCount(); // Update the block count after a new block is added
+                } catch (error) {
+                    console.error('Error:', error);
+                    document.getElementById('output').textContent = 'Error adding block';
+                }
+            }
+        }
+
+        // Function to update block count
+        async function updateBlockCount() {
+            try {
+                const response = await fetch('/blockchain/length');
+                const data = await response.json();
+                document.getElementById('blockCount').textContent = 'Total Blocks: ' + data.length;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Update block count when the page loads
+        window.onload = updateBlockCount;
+    </script>
+</body>
+
+</html>
